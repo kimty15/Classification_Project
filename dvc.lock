@@ -1,0 +1,100 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/Classification/pipeline/stage01.py
+    deps:
+    - path: config/config.yaml
+      md5: 9a1ad71c6c59b4208f1f50f34869d405
+      size: 816
+    - path: src/Classification/pipeline/stage01.py
+      md5: b0e94954ea1b224ad35898efee22c080
+      size: 1025
+    outs:
+    - path: artifacts/data_ingestion/Chicken-fecal-images
+      md5: 9e1f8dd2eae3c29e9d635df89d438ae4.dir
+      size: 12207807
+      nfiles: 390
+  prepare_base_model:
+    cmd: python src/Classification/pipeline/stage02.py
+    deps:
+    - path: config/config.yaml
+      md5: 9a1ad71c6c59b4208f1f50f34869d405
+      size: 816
+    - path: src/Classification/pipeline/stage02.py
+      md5: 3e6d2ea6c61e0137d2fbf79594845e6b
+      size: 1119
+    params:
+      params.yaml:
+        CLASSES: 2
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+        INCLUDE_TOP: false
+        LEARNING_RATE: 0.01
+        WEIGHTS: imagenet
+    outs:
+    - path: artifacts/prepare_base_model
+      md5: 0bd9617a21df4817f69a742b370a9151.dir
+      size: 118054560
+      nfiles: 2
+  training:
+    cmd: python src/Classification/pipeline/stage03.py
+    deps:
+    - path: artifacts/data_ingestion/Chicken-fecal-images
+      md5: 9e1f8dd2eae3c29e9d635df89d438ae4.dir
+      size: 12207807
+      nfiles: 390
+    - path: artifacts/prepare_base_model
+      md5: 0bd9617a21df4817f69a742b370a9151.dir
+      size: 118054560
+      nfiles: 2
+    - path: config/config.yaml
+      md5: 9a1ad71c6c59b4208f1f50f34869d405
+      size: 816
+    - path: src/Classification/components/prepare_callbacks.py
+      md5: 84b6821e6b6193e907ebe9320a5b2007
+      size: 1007
+    - path: src/Classification/pipeline/stage03.py
+      md5: d58a951d13b3fcf889312f5e0d93043f
+      size: 1373
+    params:
+      params.yaml:
+        AUGMENTATION: true
+        BATCH_SIZE: 16
+        EPOCHS: 1
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+    outs:
+    - path: artifacts/training/model.h5
+      md5: cb74a66b5d118a04c135bddd9212f99c
+      size: 59337520
+  evaluation:
+    cmd: python src/Classification/pipeline/stage04.py
+    deps:
+    - path: artifacts/data_ingestion/Chicken-fecal-images
+      md5: 9e1f8dd2eae3c29e9d635df89d438ae4.dir
+      size: 12207807
+      nfiles: 390
+    - path: artifacts/training/model.h5
+      md5: cb74a66b5d118a04c135bddd9212f99c
+      size: 59337520
+    - path: config/config.yaml
+      md5: 9a1ad71c6c59b4208f1f50f34869d405
+      size: 816
+    - path: src/Classification/pipeline/stage04.py
+      md5: b1085f340f3a347bea84aa5c67a28a18
+      size: 983
+    params:
+      params.yaml:
+        BATCH_SIZE: 16
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+    outs:
+    - path: scores.json
+      md5: 327dbedca4ef3db5e0ca3acbcf9689d6
+      size: 58

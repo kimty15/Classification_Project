@@ -1,23 +1,50 @@
 from src.Classification import logging
-from src.Classification.exception import CustomExpection
+from Classification.pipeline.stage01 import DataIngestionTrainingPipeline
+from Classification.pipeline.stage02 import PrepareBaseModelTrainingPipeline
+from Classification.pipeline.stage03 import ModelTrainingPipeline
+from Classification.pipeline.stage04 import EvaluationPipeline
+from Classification.exception import CustomExpection
 import sys
-from src.Classification.utils.common import read_yaml
-from src.Classification.exception import CustomExpection
-from pathlib import Path
-path_file = 'config\config.yaml'
 
+STAGE_NAME = "Data Ingestion stage"
+try:
+    logging.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+    obj = DataIngestionTrainingPipeline()
+    obj.main()
+    logging.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+    logging.error(f"Error in stage {STAGE_NAME}")
+    raise CustomExpection(e,sys)
 
+STAGE_NAME = "Prepare base model"
+try: 
+   logging.info(f"*******************")
+   logging.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   prepare_base_model = PrepareBaseModelTrainingPipeline()
+   prepare_base_model.main()
+   logging.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+    logging.error(f"Error in stage {STAGE_NAME}")
+    raise CustomExpection(e,sys)
 
+STAGE_NAME = "Training"
+try: 
+   logging.info(f"*******************")
+   logging.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   model_trainer = ModelTrainingPipeline()
+   model_trainer.main()
+   logging.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+    logging.error(f"Error in stage {STAGE_NAME}")
+    raise CustomExpection(e,sys)
 
-# def test_read_yaml_exception():
-#     try:
-#         config = read_yaml(path_file)
-#         logging.info("Read successfully")
-#     except Exception as e:
-#         logging.error("Error occured in read file yaml")
-#         raise CustomExpection(e,sys)
-    
-# main 
-if __name__ == "__main__":
-    config_data = read_yaml(Path(path_file))
-    print(config_data.artifacts_root)
+STAGE_NAME = "Evaluation stage"
+try:
+   logging.info(f"*******************")
+   logging.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   model_evalution = EvaluationPipeline()
+   model_evalution.main()
+   logging.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+    logging.error(f"Error in stage {STAGE_NAME}")
+    raise CustomExpection(e,sys)
